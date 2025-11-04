@@ -20,8 +20,10 @@ struct ConversationDetailView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.moriaBackground.ignoresSafeArea()
+        let background = Color.moriaBackground.ignoresSafeArea()
+
+        return ZStack {
+            background
 
             VStack(spacing: 0) {
                 // Messages List
@@ -49,13 +51,9 @@ struct ConversationDetailView: View {
                     .refreshable {
                         await viewModel.loadConversationMessages()
                     }
-                    .onChange(of: viewModel.messages.count) { _ in
+                    .onChange(of: viewModel.messages.count) {
                         // Scroll to bottom when new message arrives
-                        if let lastMessage = viewModel.messages.last {
-                            withAnimation {
-                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                            }
-                        }
+                        scrollToBottom(proxy: proxy)
                     }
                 }
 
@@ -144,6 +142,14 @@ struct ConversationDetailView: View {
                 }
             } catch {
                 print("[FAIL] Failed to send typing indicator: \(error)")
+            }
+        }
+    }
+
+    private func scrollToBottom(proxy: ScrollViewProxy) {
+        if let lastMessage = viewModel.messages.last {
+            withAnimation {
+                proxy.scrollTo(lastMessage.id, anchor: .bottom)
             }
         }
     }

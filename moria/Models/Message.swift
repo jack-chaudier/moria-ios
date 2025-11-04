@@ -16,6 +16,8 @@ struct Message: Identifiable, Codable {
     let encryptedContent: Data
     let delivered: Bool
     let read: Bool
+    let deliveredAt: Date?
+    let readAt: Date?
     let createdAt: Date
     let expiresAt: Date?
 
@@ -28,6 +30,8 @@ struct Message: Identifiable, Codable {
         case encryptedContent = "encrypted_content"
         case delivered
         case read
+        case deliveredAt = "delivered_at"
+        case readAt = "read_at"
         case createdAt = "created_at"
         case expiresAt = "expires_at"
     }
