@@ -51,7 +51,7 @@ struct GroupConversation: Identifiable, Codable {
     let description: String?
     let createdBy: String
     let avatarFileId: String?
-    let memberCount: Int
+    let memberCount: Int?
     let createdAt: Date
     let updatedAt: Date
 

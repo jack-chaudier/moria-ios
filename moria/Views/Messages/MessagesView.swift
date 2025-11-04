@@ -171,7 +171,7 @@ struct GroupRow: View {
                         .font(.system(size: 10))
                         .foregroundColor(.moriaTextTertiary)
 
-                    Text("\(group.memberCount) MEMBERS")
+                    Text("\(group.memberCount ?? 0) MEMBERS")
                         .font(MoriaFont.caption2)
                         .foregroundColor(.moriaTextTertiary)
                 }
