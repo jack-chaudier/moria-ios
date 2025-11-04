@@ -236,8 +236,7 @@ struct TypingDotsView: View {
                 otherUserId: "user-123",
                 otherUsername: "alice",
                 lastMessage: nil,
-                unreadCount: 0,
-                createdAt: Date()
+                unreadCount: 0
             )
         )
     }
