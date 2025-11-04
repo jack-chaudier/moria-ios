@@ -27,6 +27,12 @@ struct MessagesView: View {
                     contentView
                 }
             }
+            .sheet(isPresented: $showNewMessage) {
+                NewConversationView()
+            }
+            .sheet(isPresented: $showNewGroup) {
+                NewGroupView(viewModel: viewModel)
+            }
         }
     }
 
@@ -45,6 +51,9 @@ struct MessagesView: View {
                 conversationsSection
             }
             .padding(MoriaSpacing.md)
+        }
+        .refreshable {
+            viewModel.loadData()
         }
     }
 
@@ -101,7 +110,9 @@ struct MessagesView: View {
                 emptyStateView
             } else {
                 ForEach(viewModel.conversations) { conversation in
-                    ConversationRow(conversation: conversation)
+                    NavigationLink(destination: ConversationDetailView(conversation: conversation, viewModel: viewModel)) {
+                        ConversationRow(conversation: conversation)
+                    }
                 }
             }
         }

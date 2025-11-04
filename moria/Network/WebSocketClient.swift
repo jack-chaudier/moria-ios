@@ -193,6 +193,7 @@ final class WebSocketClient: NSObject, ObservableObject {
 
             // Extract data dictionary
             guard let dataDict = message.data?.value as? [String: Any] else {
+                print("[WARN] WebSocket message has no data payload")
                 return
             }
 
@@ -200,23 +201,32 @@ final class WebSocketClient: NSObject, ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 switch message.type {
                 case .notification:
+                    print("[INFO] Received notification: \(dataDict)")
                     self?.notificationReceived.send(dataDict)
                 case .presence:
+                    print("[INFO] Presence update: \(dataDict)")
                     self?.presenceUpdate.send(dataDict)
                 case .typing:
+                    print("[INFO] Typing indicator: \(dataDict)")
                     self?.typingUpdate.send(dataDict)
                 case .message:
+                    print("[INFO] New message received via WebSocket")
                     self?.messageReceived.send(dataDict)
                 case .pong:
                     // Received pong response
+                    print("[INFO] Received pong from server")
                     break
                 case .ping:
                     // Respond to server ping
+                    print("[INFO] Received ping, sending pong")
                     self?.sendPong()
                 }
             }
         } catch {
-            print("Failed to parse WebSocket message: \(error)")
+            print("[FAIL] Failed to parse WebSocket message: \(error)")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("[FAIL] Raw message: \(jsonString)")
+            }
         }
     }
 

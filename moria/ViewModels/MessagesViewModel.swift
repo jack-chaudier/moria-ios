@@ -34,14 +34,35 @@ final class MessagesViewModel: ObservableObject {
                 self?.handleNewMessage(data)
             }
             .store(in: &cancellables)
+
+        // Listen for typing indicators
+        wsClient.typingUpdate
+            .sink { [weak self] data in
+                self?.handleTypingUpdate(data)
+            }
+            .store(in: &cancellables)
     }
 
     private func handleNewMessage(_ data: [String: Any]) {
-        // TODO: Decode and add new message
-        print("New message received: \(data)")
+        print("[INFO] New message received: \(data)")
+        // Reload messages for current conversation
         Task {
             await loadConversationMessages()
         }
+    }
+
+    private func handleTypingUpdate(_ data: [String: Any]) {
+        // TODO: Update typing indicator state based on data
+        // Expected format: { "user_id": "...", "conversation_id": "...", "is_typing": true }
+        print("[INFO] Typing update: \(data)")
+
+        guard let conversationId = data["conversation_id"] as? String,
+              conversationId == selectedConversation?.id else {
+            return
+        }
+
+        // Update typing state in UI
+        // This would set the isTyping state in the ConversationDetailView
     }
 
     func loadData() {
@@ -89,23 +110,41 @@ final class MessagesViewModel: ObservableObject {
     }
 
     func sendMessage(text: String) async {
-        // TODO: Encrypt message content
-        guard let conversationId = selectedConversation?.id else { return }
+        // TODO: Implement actual E2EE encryption
+        guard let conversationId = selectedConversation?.id else {
+            print("[FAIL] No conversation selected")
+            return
+        }
 
+        // For now, just UTF-8 encode the text
+        // In production, this would be E2EE encrypted
         let encryptedContent = text.data(using: .utf8) ?? Data()
 
         do {
             if let recipientId = selectedConversation?.otherUserId {
-                _ = try await messageService.sendMessage(
+                print("[INFO] Sending message to \(recipientId)")
+                let sentMessage = try await messageService.sendMessage(
                     recipientId: recipientId,
                     conversationId: conversationId,
                     encryptedContent: encryptedContent
                 )
-            }
 
-            await loadConversationMessages()
+                // Add message to local list immediately for instant feedback
+                messages.append(sentMessage)
+
+                print("[PASS] Message sent successfully")
+            }
         } catch {
+            print("[FAIL] Failed to send message: \(error)")
             self.error = error.localizedDescription
+        }
+    }
+
+    func markMessageAsRead(messageId: String) async {
+        do {
+            try await messageService.markAsRead(id: messageId)
+        } catch {
+            print("[FAIL] Failed to mark message as read: \(error)")
         }
     }
 
