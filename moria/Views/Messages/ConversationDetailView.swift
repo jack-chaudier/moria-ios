@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ConversationDetailView: View {
     let conversation: Conversation
-    @StateObject private var viewModel: MessagesViewModel
+    @ObservedObject var viewModel: MessagesViewModel
     @State private var messageText: String = ""
     @State private var isTyping: Bool = false
     @FocusState private var isInputFocused: Bool
 
-    init(conversation: Conversation, viewModel: MessagesViewModel = MessagesViewModel()) {
+    init(conversation: Conversation, viewModel: MessagesViewModel) {
         self.conversation = conversation
-        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.viewModel = viewModel
     }
 
     var body: some View {
@@ -237,7 +237,8 @@ struct TypingDotsView: View {
                 otherUsername: "alice",
                 lastMessage: nil,
                 unreadCount: 0
-            )
+            ),
+            viewModel: MessagesViewModel()
         )
     }
 }
