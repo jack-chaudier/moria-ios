@@ -79,7 +79,7 @@ struct ConnectionTestView: View {
 
             VStack(spacing: MoriaSpacing.xs) {
                 infoRow(label: "REST API", value: "https://moria-backend.duckdns.org/api/v1")
-                infoRow(label: "WebSocket", value: "wss://moria-backend.duckdns.org/ws")
+                infoRow(label: "WebSocket", value: "wss://moria-backend.duckdns.org/api/v1/ws")
                 infoRow(label: "TLS", value: "Let's Encrypt ✓")
                 infoRow(label: "Cert", value: "development-cert-fingerprint")
                 infoRow(label: "Device ID", value: UIDevice.current.identifierForVendor?.uuidString.prefix(8).description ?? "N/A")
@@ -315,7 +315,7 @@ struct ConnectionTestView: View {
         // For testing, we'll just verify the URL is valid and can be created
         // Full WebSocket test would require more complex async handling
 
-        guard let url = URL(string: "wss://moria-backend.duckdns.org/ws") else {
+        guard let url = URL(string: "wss://moria-backend.duckdns.org/api/v1/ws") else {
             addResult(name: "WebSocket", passed: false, message: "Invalid URL", duration: nil)
             return
         }
@@ -338,7 +338,7 @@ struct ConnectionTestView: View {
         wsTask.cancel(with: .goingAway, reason: nil)
 
         // If we got here, the WebSocket at least tried to connect
-        addResult(name: "WebSocket", passed: true, message: "[PASS] WebSocket endpoint available (wss://moria-backend.duckdns.org/ws)", duration: Date().timeIntervalSince(startTime))
+        addResult(name: "WebSocket", passed: true, message: "[PASS] WebSocket endpoint available (wss://moria-backend.duckdns.org/api/v1/ws)", duration: Date().timeIntervalSince(startTime))
     }
 
     private func testAuthenticatedEndpoint() async {

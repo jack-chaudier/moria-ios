@@ -104,10 +104,19 @@ final class WebSocketClient: NSObject, ObservableObject {
     // MARK: - Connection Management
 
     func connect(accessToken: String) {
-        guard let url = URL(string: "wss://moria-backend.duckdns.org/ws") else { return }
+        guard let url = URL(string: "wss://moria-backend.duckdns.org/api/v1/ws") else {
+            print("[FAIL] Invalid WebSocket URL")
+            return
+        }
 
         var request = URLRequest(url: url)
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+
+        // Add required WebSocket headers
+        request.timeoutInterval = 10
+
+        print("[INFO] Connecting to WebSocket: \(url.absoluteString)")
+        print("[INFO] Authorization: Bearer \(accessToken.prefix(20))...")
 
         webSocketTask = session?.webSocketTask(with: request)
         webSocketTask?.resume()
@@ -287,6 +296,7 @@ final class WebSocketClient: NSObject, ObservableObject {
 
 extension WebSocketClient: URLSessionWebSocketDelegate {
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+        print("[PASS] WebSocket connected successfully")
         DispatchQueue.main.async { [weak self] in
             self?.isConnected = true
             self?.connectionState = .running
@@ -294,8 +304,20 @@ extension WebSocketClient: URLSessionWebSocketDelegate {
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
+        let reasonString = reason.flatMap { String(data: $0, encoding: .utf8) } ?? "No reason"
+        print("[WARN] WebSocket closed: code=\(closeCode.rawValue), reason=\(reasonString)")
         DispatchQueue.main.async { [weak self] in
             self?.handleDisconnection()
+        }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error = error {
+            print("[FAIL] WebSocket task failed: \(error.localizedDescription)")
+            if let nsError = error as NSError? {
+                print("[FAIL] Error domain: \(nsError.domain), code: \(nsError.code)")
+                print("[FAIL] Error userInfo: \(nsError.userInfo)")
+            }
         }
     }
 }
